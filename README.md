@@ -15,7 +15,8 @@ Interests and Passions
 How to Reach Me
 If you want to get in touch or collaborate, feel free to reach out to me through the following channels:
 
-📧 Email: dinhcoderjapan@example.com
+📧 Email1: phungbadinhcode@gmail.com
+    Email2:phungthikimdung3456@gmail.com
 🐙 GitHub: dinhcoderjapan
 
 Feel free to explore my repositories, and don't forget to check out the latest projects I'm working on!
@@ -43,7 +44,8 @@ Thank you for visiting my GitHub profile! Have a great day! 🚀
 連絡先
 もしご連絡やコラボレーションをご希望の場合は、以下の方法でお気軽にご連絡ください：
 
-📧 メール: dinhcoderjapan@example.com
+📧 メール: Email1: phungbadinhcode@gmail.com
+    Email2:phungthikimdung3456@gmail.com
 🐙 GitHub: dinhcoderjapan
 
 私のリポジトリを自由に探索して、最新のプロジェクトをチェックしてください！
