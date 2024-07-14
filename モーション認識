@@ -1,0 +1,95 @@
+import cv2
+import mediapipe as mp
+import webbrowser
+
+# Khởi tạo mediapipe cho việc nhận diện cử chỉ và bàn tay
+# ジェスチャーと手の検出のためにMediaPipeを初期化する
+mp_hands = mp.solutions.hands
+
+# Khởi tạo webcam
+# ウェブカメラを初期化します。
+cap = cv2.VideoCapture(0)
+
+# Kiểm tra xem webcam có được mở không
+# ウェブカメラが開かれているかどうかを確認します。
+if not cap.isOpened():
+    print("Không thể mở webcam.")
+    exit()
+
+# Khởi tạo bộ nhận diện bàn tay
+# 手の検出器を初期化する
+hands = mp_hands.Hands()
+
+# Trạng thái cử chỉ và ứng dụng đã mở
+# ジェスチャーの状態とアプリケーションが開いています
+gesture_state = None
+opened_app = None
+is_app_opened = False
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("Không thể đọc khung hình.")
+        break
+    
+    # Chuyển đổi sang không gian màu RGB
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+    # Nhận diện bàn tay
+    # 手の検出を行います
+    hand_results = hands.process(rgb_frame)
+    if hand_results.multi_hand_landmarks:
+        for hand_landmarks in hand_results.multi_hand_landmarks:
+            for landmark in hand_landmarks.landmark:
+                x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0])
+                cv2.circle(frame, (x, y), 5, (255, 0, 0), -1)
+            
+            # Xác định hành động xòe bàn tay
+            # 手を広げるジェスチャーを検出します
+            if len(hand_landmarks.landmark) >= 5:
+                thumb_tip = hand_landmarks.landmark[4]
+                index_finger_tip = hand_landmarks.landmark[8]
+                
+                thumb_x, thumb_y = int(thumb_tip.x * frame.shape[1]), int(thumb_tip.y * frame.shape[0])
+                index_x, index_y = int(index_finger_tip.x * frame.shape[1]), int(index_finger_tip.y * frame.shape[0])
+                
+                # Xác định hành động xòe bàn tay
+                # 手を広げるジェスチャーを検出します。
+                if thumb_y > index_y:
+                    gesture_state = "spread"
+                else:
+                    gesture_state = "other"
+    else:
+        gesture_state = None
+    
+    cv2.imshow('Gesture Control', frame)
+    
+    # Mở ứng dụng tương ứng khi có hành động xòe bàn tay
+    # 手の指を広げる動作が検出された場合、対応するアプリケーションを開きます
+    if gesture_state == "spread" and not is_app_opened:
+        if opened_app is None:
+            webbrowser.open("https://www.google.com")
+            opened_app = "google"
+            is_app_opened = True
+        elif opened_app == "google":
+            webbrowser.open("https://www.youtube.com")
+            opened_app = "youtube"
+            is_app_opened = True
+        elif opened_app == "youtube":
+            webbrowser.open("https://facebook")
+            opened_app = "facebook"
+            is_app_opened = True
+            
+              
+    if gesture_state == "other":
+        is_app_opened = False
+    
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Giải phóng tài nguyên và đóng cửa sổ
+# リソースを解放し、ウィンドウを閉じます
+cap.release()
+cv2.destroyAllWindows()
+
+
