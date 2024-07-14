@@ -1,0 +1,108 @@
+# CSVファイルからデータを読み込む
+file_path = r"C:\Users\phung\Downloads\GOOG.csv"
+data = pd.read_csv(file_path)
+
+# 'Date'列を日付形式に変換する
+data['Date'] = pd.to_datetime(data['Date'])
+
+# 'Date'をインデックスに設定する
+data.set_index('Date', inplace=True)
+
+# 終値の折れ線グラフを描画する
+plt.figure(figsize=(12, 6))
+plt.plot(data.index, data['Close'], label='終値', color='blue')
+plt.title('Google株の終値の折れ線グラフ')
+plt.xlabel('日付')
+plt.ylabel('終値 (USD)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# 始値に対する終値の散布図を描画する
+plt.figure(figsize=(10, 6))
+plt.scatter(data['Open'], data['Close'], color='green', alpha=0.5)
+plt.title('始値に対する終値の散布図')
+plt.xlabel('始値 (USD)')
+plt.ylabel('終値 (USD)')
+plt.grid(True)
+plt.show()
+
+# 終値の変動率を計算する
+data['Change'] = (data['Close'] - data['Open']) / data['Open'] * 100
+
+# 上昇日数と下落日数を計算する
+num_rise = (data['Change'] > 0).sum()
+num_fall = (data['Change'] < 0).sum()
+
+# 円グラフで上昇と下落の割合を表示する
+labels = ['上昇', '下落']
+sizes = [num_rise, num_fall]
+colors = ['green', 'red']
+plt.figure(figsize=(8, 8))
+plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+plt.title('上昇と下落の割合の円グラフ')
+plt.axis('equal')
+plt.show()
+
+# 3Dスペースの散布図を描画する
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# 3Dスペースのデータを設定する
+x = range(len(data))  # 日付ではなくインデックスを使用して単純化する
+y = data['Close']
+z = data['Volume']
+
+# 3D散布図を描画する
+scatter = ax.scatter(x, y, z, c=z, cmap='viridis', linewidth=0.5, alpha=0.8)
+
+# 軸ラベルを設定する
+ax.set_xlabel('日付')
+ax.set_ylabel('終値 (USD)')
+ax.set_zlabel('取引量')
+
+# ホバー時に座標を表示する
+def on_hover(event):
+    if event.inaxes == ax:
+        ax.format_coord = lambda x, y: f'日付: {int(x)}, 終値: {y:.2f} USD'
+
+fig.canvas.mpl_connect('motion_notify_event', on_hover)
+
+# カラーバーとタイトルを表示する
+plt.title('Google株の3Dスペース散布図')
+plt.colorbar(scatter, label='取引量')
+plt.show()
+
+# 将来のトレンドを分析する
+# 移動平均線を使用してトレンドを評価する
+short_window = 20
+long_window = 50
+
+# 移動平均線の新しい列を作成する
+data['Short_MA'] = data['Close'].rolling(window=short_window, min_periods=1).mean()
+data['Long_MA'] = data['Close'].rolling(window=long_window, min_periods=1).mean()
+
+# 移動平均線の折れ線グラフを描画する
+plt.figure(figsize=(12, 6))
+plt.plot(data.index, data['Close'], label='終値', color='blue')
+plt.plot(data.index, data['Short_MA'], label=f'{short_window}日移動平均', color='orange')
+plt.plot(data.index, data['Long_MA'], label=f'{long_window}日移動平均', color='red')
+plt.title('終値と移動平均線の折れ線グラフ')
+plt.xlabel('日付')
+plt.ylabel('終値 (USD)')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# トレンドの予測を行う
+# 短期移動平均線 (short MA) が長期移動平均線 (long MA) を超えた場合、トレンドは上昇する可能性がある
+# その逆の場合、トレンドは下降する可能性がある
+last_short_ma = data['Short_MA'].iloc[-1]
+last_long_ma = data['Long_MA'].iloc[-1]
+
+if last_short_ma > last_long_ma:
+    trend = '将来のトレンドは上昇する可能性があります'
+else:
+    trend = '将来のトレンドは下降する可能性があります'
+
+print(f'将来のトレンド予測: {trend}')
